@@ -17,11 +17,11 @@ namespace MagicHouse_API.Controllers
             return Ok(HouseStore.houses);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetHouse")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<HouseDTO?> GetHouse(int id)
+        public ActionResult<HouseDTO?> GetHouse([FromQuery]int id)
         {
             if (id == 0)
             {
@@ -35,5 +35,31 @@ namespace MagicHouse_API.Controllers
             return Ok(house);    
         }
 
-    }   
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult<HouseDTO> CreateHouse([FromBody] HouseDTO house)
+        {
+            //Check if house name already exists
+            if(HouseStore.houses.FirstOrDefault(x => x.Name.ToLower() == house.Name.ToLower()) != null)
+            {
+                //Add an error to the ModelState, with a custom name and message
+                ModelState.AddModelError("DuplicateNameError", "Villa name is not unique!");
+                //Send a 400 bad response with the above error
+                return BadRequest(ModelState);
+            }
+
+            if (house == null || house.Id > 0)
+            {
+                return BadRequest(house);
+            }
+            house.Id = HouseStore.houses.OrderByDescending(x => x.Id).First().Id + 1;
+            HouseStore.houses.Add(house);
+            
+            //Instead of returning status 200 OK, we return 201 created, while also returning the API location where the object which was created can be found.
+            //Here you call the GetHouse controller, passing the id of the house you just created.
+            //so it will also return "api/HouseAPI/the_id_of_the_new_object"
+            return CreatedAtRoute("GetHouse", new {id = house.Id}, house);
+        }
+    }  
 }
