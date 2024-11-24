@@ -1,6 +1,7 @@
 ﻿using MagicHouse_API.Data;
 using MagicHouse_API.Models;
 using MagicHouse_API.Models.DTOs;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MagicHouse_API.Controllers
@@ -103,6 +104,36 @@ namespace MagicHouse_API.Controllers
             house.SquareFt = houseDto.SquareFt;
 
             return CreatedAtRoute("GetHouse", new { id = house.Id }, house);
-        } 
+        }
+
+        [HttpPatch("{id:int}", Name = "UpdateHousePart")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult UpdateHousePart(int id, JsonPatchDocument<HouseDTO> patchDto)
+        {
+            if (patchDto is null || id == 0)
+            {
+                return BadRequest();
+            }
+            var house = HouseStore.houses.FirstOrDefault(x => x.Id == id);
+            if(house is null)
+            {
+                return NotFound();
+            }
+            //Apply The change to the house
+            patchDto.ApplyTo(house, ModelState);
+            
+            //If something went wrong return a bad request with the model state else return the updated model
+            if (ModelState.IsValid)
+            {
+                return CreatedAtRoute("GetHouse", new { id = house.Id }, house);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+        
     }  
 }
