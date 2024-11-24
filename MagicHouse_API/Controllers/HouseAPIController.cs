@@ -9,7 +9,7 @@ namespace MagicHouse_API.Controllers
     [Route("api/HouseAPI")]
     [ApiController]
     public class HouseAPIController : ControllerBase
-    {   
+    {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<HouseDTO>> GetHouses()
@@ -21,18 +21,18 @@ namespace MagicHouse_API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<HouseDTO?> GetHouse([FromQuery]int id)
+        public ActionResult<HouseDTO?> GetHouse([FromQuery] int id)
         {
             if (id == 0)
             {
                 return BadRequest();
             }
-            var house = HouseStore.houses.FirstOrDefault(x => x.Id == id) ;
-            if(house == null)
+            var house = HouseStore.houses.FirstOrDefault(x => x.Id == id);
+            if (house == null)
             {
                 return NotFound();
             }
-            return Ok(house);    
+            return Ok(house);
         }
 
         [HttpPost]
@@ -67,7 +67,7 @@ namespace MagicHouse_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult DeleteHouse(int id) {
-            if(id == 0)
+            if (id == 0)
             {
                 return BadRequest();
             }
@@ -80,8 +80,29 @@ namespace MagicHouse_API.Controllers
             {
                 HouseStore.houses.Remove(house);
             }
-            
+
             return NoContent();
         }
+
+        [HttpPut("{id:int}", Name = "UpdateHouse")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult UpdateHouse(int id, [FromBody] HouseDTO houseDto)
+        {
+            if (id == 0 || id != houseDto.Id) {
+                return BadRequest();
+            }
+            var house = HouseStore.houses.FirstOrDefault(x => x.Id == id);
+            if (house is null)
+            {
+                return NotFound();
+            }
+            house.Name = houseDto.Name;
+            house.Occupancy = houseDto.Occupancy;
+            house.SquareFt = houseDto.SquareFt;
+
+            return CreatedAtRoute("GetHouse", new { id = house.Id }, house);
+        } 
     }  
 }

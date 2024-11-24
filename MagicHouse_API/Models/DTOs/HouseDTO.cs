@@ -11,5 +11,7 @@ namespace MagicHouse_API.Models.DTOs
         [MaxLength(30)]
         [MinLength(1)]
         public string Name { get; set; }
+        public int SquareFt {  get; set; }
+        public int Occupancy { get; set; }
     }
 }
