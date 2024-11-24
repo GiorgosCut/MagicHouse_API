@@ -1,7 +1,6 @@
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 // Controllers that also support NewtonsoftJson
 builder.Services.AddControllers(option =>
 {

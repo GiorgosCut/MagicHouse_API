@@ -11,10 +11,20 @@ namespace MagicHouse_API.Controllers
     [ApiController]
     public class HouseAPIController : ControllerBase
     {
+        private readonly ILogger<HouseAPIController> _logger;
+
+        //On the constructor of a controller, using dependency injection,
+        //inject a logger object
+        public HouseAPIController(ILogger<HouseAPIController> logger)
+        {
+            _logger = logger;
+        }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<HouseDTO>> GetHouses()
         {
+            _logger.LogInformation("Returning all houses");
             return Ok(HouseStore.houses);
         }
 
@@ -26,6 +36,7 @@ namespace MagicHouse_API.Controllers
         {
             if (id == 0)
             {
+                _logger.LogError("Id is 0", [id]);
                 return BadRequest();
             }
             var house = HouseStore.houses.FirstOrDefault(x => x.Id == id);
